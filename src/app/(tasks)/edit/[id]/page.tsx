@@ -1,53 +1,73 @@
+import Link from 'next/link';
 import { api } from '@/trpc/server';
-import { notFound, redirect } from 'next/navigation';
+import { redirect } from 'next/navigation';
+import { FeedbackMessage } from '@/app/components/FeedbackMessage';
 
-type Params = {
-  params: { id: string };
-};
+export default async function Home() {
+  const tasks = await api.task.list();
 
-export default async function EditTaskPage({ params }: Params) {
-  const id = params.id;
-
-  const task = await api.task.get(id).catch(() => notFound());
-
-  async function updateTask(formData: FormData) {
+  async function deleteTask(formData: FormData) {
     'use server';
-    const title = formData.get('title') as string;
-    const description = formData.get('description') as string | undefined;
-
-    await api.task.update({ id, title, description });
-    redirect('/');
+    const id = formData.get('id');
+    if (typeof id !== 'string') {
+      throw new Error('ID inválido');
+    }
+    await api.task.delete(id);
+    redirect('/?msg=deleted');
   }
 
+function formatDate(date: string | Date) {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  return d.toLocaleString('pt-BR', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
 
 
   return (
-    <div className="container mx-auto p-4 space-y-4">
-      <h1 className="text-2xl font-bold">Edit Task</h1>
-
-      <form action={updateTask} className="space-y-4">
-        <input
-          name="title"
-          defaultValue={task.title}
-          required
-          className="w-full px-4 py-2 border border-gray-300 rounded-md"
-        />
-        <textarea
-          name="description"
-          defaultValue={task.description ?? ''}
-          className="w-full px-4 py-2 border border-gray-300 rounded-md"
-        />
-        <div className="flex gap-4">
-          <button
-            type="submit"
-            className="btn btn-primary px-4 py-2 bg-blue-500 text-white rounded-md"
-          >
-            Save
-          </button>
-        </div>
-      </form>
-
-     
+    <div className="container mx-auto p-4">
+      <h1 className="text-2xl font-bold mb-4">My Tasks 🌈</h1>
+      <FeedbackMessage />
+      <Link
+        href="/new"
+        className="inline-block mb-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
+      >
+        Create New Task
+      </Link>
+      <div className="space-y-4">
+        {tasks.map((task) => (
+          <div key={task.id} className="border rounded-lg p-4 shadow-sm">
+            <h2 className="font-bold text-lg">{task.title}</h2>
+            {task.description && (
+              <p className="text-gray-600 mt-1">{task.description}</p>
+            )}
+            <p className="text-xs text-gray-400 mt-1">
+                <span>Criada em:</span> {formatDate(task.createdAt)}
+              </p>
+            <div className="mt-3 flex items-center gap-4">
+              <Link
+                href={`/edit/${task.id}`}
+                className="text-blue-500 hover:text-blue-700 text-sm"
+              >
+                Edit Task
+              </Link>
+              <form action={deleteTask}>
+                <input type="hidden" name="id" value={task.id} />
+                <button
+                  type="submit"
+                  className="text-red-500 hover:text-red-700 text-sm"
+                >
+                  Delete
+                </button>
+              </form>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
