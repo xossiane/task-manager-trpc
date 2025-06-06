@@ -43,7 +43,8 @@ Um gerenciador simples de tarefas construído com Next.js 15, usando TRPC para c
    # ou
    yarn dev
 
-4. Abra no navegador:[
+4. Abra no navegador:
+   ```bash
    http://localhost:3000
 
 ## Como funciona o sistema
