@@ -30,7 +30,6 @@ Um gerenciador simples de tarefas construído com Next.js 15, usando TRPC para c
    ```bash
    git clone https://github.com/seu-usuario/seu-repo.git
    cd seu-repo
-## Como rodar localmente
 
 2. Instale as dependências:
    ```bash
