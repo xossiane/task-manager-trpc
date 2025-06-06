@@ -2,14 +2,17 @@ import { TaskForm } from '@/app/components/TaskForm';
 import { TaskSchema } from '@/schemas/task';
 import { api } from '@/trpc/server';
 import { z } from 'zod';
+import { redirect } from 'next/navigation';
 
 const TaskFormData = TaskSchema.omit({ id: true, createdAt: true });
 type TaskFormData = z.infer<typeof TaskFormData>;
 
 export default function NewTaskPage() {
+
   async function createTask(data: TaskFormData) {
     'use server';
-    return await api.task.create(data);
+    await api.task.create(data);
+    redirect('/'); 
   }
 
   return (

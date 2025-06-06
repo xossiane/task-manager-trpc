@@ -1,9 +1,9 @@
-// src/server/trpc/context.ts
+
 import { inferAsyncReturnType } from '@trpc/server';
 
 export async function createContext() {
   return {
-    // Context object
+    
   };
 }
 
